@@ -54,6 +54,17 @@ The first visit opens a setup wizard: server check, APNs, pairing, first project
 
 Data lives in `./data/boop.db`. Back up by copying that file (use `sqlite3 data/boop.db ".backup backup.db"` for a consistent copy while running). Back up your `.p8` key separately.
 
+## Quick start (binary)
+
+Every [release](https://github.com/chrisgreg/boop/releases) ships a static, dependency-free binary for Linux, macOS and Windows (amd64 and arm64) with the web UI embedded. Download the archive for your platform, verify it against `checksums.txt` if you like, and run:
+
+```bash
+tar xzf boop_*_linux_amd64.tar.gz && cd boop_*_linux_amd64
+BOOP_DATABASE_PATH=./boop.db ./boop     # listens on :8080
+```
+
+Configuration is the same set of environment variables as Docker (see [Configuration](#configuration)). `BOOP_DATABASE_PATH` defaults to `/data/boop.db`, so set it to somewhere writable.
+
 ## Send an event
 
 Create a project in the web UI and copy its API key (shown once). Then:
@@ -119,7 +130,7 @@ From GitHub Actions:
 
 ## Integrations
 
-Official clients live in their own repos. They all speak the same one endpoint (`POST /api/v1/events`), redact sensitive keys before sending, truncate rather than reject, retry only network errors and 5xx, and never crash the host application.
+Clients live in their own repos. They all speak the same one endpoint (`POST /api/v1/events`), redact sensitive keys before sending, truncate rather than reject, retry only network errors and 5xx, and never crash the host application.
 
 ### Elixir — [`boop_ex`](https://github.com/chrisgreg/boop_ex)
 
@@ -170,6 +181,23 @@ client.exception(err, { tags: { env: 'prod' } })       // rich error data
 ```
 
 TypeScript, ESM + CJS, zero runtime dependencies, Node 18+.
+
+### Laravel — [`laravel-boop`](https://github.com/solutionforest/laravel-boop) (community)
+
+```bash
+composer require solution-forest/laravel-boop
+```
+
+```php
+use SolutionForest\Boop\Facades\Boop;   // reads BOOP_URL / BOOP_API_KEY from .env
+
+$result = Boop::send('Backup complete');
+Boop::send(['title' => 'Payment received', 'body' => '£19.99', 'level' => Level::Success, 'data' => ['customer_id' => 123]]);
+Boop::sendAsync('Cron finished');        // runs after the response is sent, never throws
+Boop::send(['title' => 'Deploy failed', 'level' => 'error', 'actions' => [['label' => 'Open run', 'url' => $runUrl]]]);
+```
+
+`send()` never throws; it returns a `Result` (`ok`, `disabled` or `failed` with a `BoopError`). PHP 8.1+, Laravel 10–13. Maintained by [Solution Forest](https://github.com/solutionforest), not by this repo.
 
 ### Sentry SDKs — drop-in DSN
 
@@ -316,7 +344,7 @@ Requires Go 1.27 and Node 24 (see `.tool-versions`). The SQLite driver is pure G
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md). Releases are tagged `vX.Y.Z`; the server, web UI and iOS app share the version.
+See [CHANGELOG.md](CHANGELOG.md). Releases are tagged `vX.Y.Z`; the server, web UI and iOS app share the version. Pushing a tag runs the test suite and, if it passes, attaches the pre-built binaries to the GitHub release (`.github/workflows/release.yml`).
 
 ## Licence
 

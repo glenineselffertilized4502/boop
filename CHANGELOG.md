@@ -4,6 +4,16 @@ All notable changes to Boop are recorded here. The format follows [Keep a Change
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-08-30
+
+### Added
+- **Sentry SDK compatibility.** Point any server-side Sentry SDK's DSN at Boop (`https://boop_proj_...@your-boop-host/1`) and it reports straight into that project with no code changes. `POST /api/{id}/envelope/` accepts Sentry envelopes (gzip/deflate included), authenticated via `X-Sentry-Auth` or `?sentry_key=`. Each Sentry event becomes a Boop event: `Type: value` title, culprit and top stack frame in the body, levels mapped (`fatal→critical`, `info`/`debug→info`), `source: "sentry"`, and grouping fingerprints (explicit ones, or exception type plus top in-app frame) so silence rules work per error group. Transactions and sessions are accepted and ignored. Keep the DSN server-side: its public key is a write-capable project API key. Contributed by [@ashwin47](https://github.com/ashwin47).
+- **Pre-built binaries.** Tagged releases now attach static, CGO-free binaries for Linux, macOS and Windows (amd64/arm64) with the web UI embedded, plus a `checksums.txt`. Tests run before anything is published (`.github/workflows/release.yml`).
+- **Laravel client.** [`laravel-boop`](https://github.com/solutionforest/laravel-boop), a community package by Solution Forest, is listed under Integrations.
+
+### Changed
+- iOS: cleaner app icons.
+
 ## [1.2.0] — 2026-08-29
 
 ### Added
@@ -35,7 +45,8 @@ All notable changes to Boop are recorded here. The format follows [Keep a Change
 - iOS app (SwiftUI, iOS 26): inbox with filters and cursor pagination, rich event detail (exception, stacktrace, tags, context, breadcrumbs, raw JSON), notification tap-through, Keychain-stored device credential.
 - Docker image, compose file and a Dokploy-specific compose file; architecture diagram (`docs/architecture`); `integration-llms.md` client spec.
 
-[Unreleased]: https://github.com/chrisgreg/boop/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/chrisgreg/boop/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/chrisgreg/boop/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/chrisgreg/boop/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/chrisgreg/boop/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/chrisgreg/boop/releases/tag/v1.0.0

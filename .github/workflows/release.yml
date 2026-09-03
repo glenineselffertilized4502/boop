@@ -1,0 +1,121 @@
+name: Release
+
+# Pushing a tag like v1.3.0 runs the full test suite, then cross-compiles a
+# static, CGO-free binary (web UI embedded) for each OS/arch and attaches the
+# archives plus a checksums file to the GitHub release for that tag.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/web/package-lock.json
+      - run: npm ci
+        working-directory: server/web
+      - run: npm run check
+        working-directory: server/web
+      - run: npx vitest run
+        working-directory: server/web
+      - run: npm run build
+        working-directory: server/web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: server/internal/web/dist
+
+  test:
+    runs-on: ubuntu-latest
+    needs: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: server/internal/web/dist
+      - run: go vet ./...
+        working-directory: server
+      - run: go test ./...
+        working-directory: server
+
+  release:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: server/internal/web/dist
+
+      - name: Build binaries
+        working-directory: server
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          mkdir -p ../dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            os="${target%/*}"; arch="${target#*/}"
+            name="boop_${version}_${os}_${arch}"
+            bin="boop"; [ "$os" = windows ] && bin="boop.exe"
+            echo "building $name"
+            GOOS="$os" GOARCH="$arch" go build -trimpath \
+              -ldflags="-s -w -X github.com/chrisgreg/boop/server/internal/api.Version=${version}" \
+              -o "../dist/$name/$bin" ./cmd/boop
+            cp ../LICENSE ../README.md "../dist/$name/"
+            if [ "$os" = windows ]; then
+              (cd ../dist && zip -qr "$name.zip" "$name")
+            else
+              tar -C ../dist -czf "../dist/$name.tar.gz" "$name"
+            fi
+            rm -r "../dist/$name"
+          done
+          (cd ../dist && sha256sum *.tar.gz *.zip > checksums.txt && cat checksums.txt)
+
+      - name: Release notes from CHANGELOG
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          # Print the "## [<version>]" section of CHANGELOG.md, up to the next "## " heading.
+          awk -v v="$version" '
+            /^## \[/ { if (found) exit; found = index($0, "## [" v "]") == 1; next }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "No CHANGELOG section for ${version}; falling back to generated notes."
+            rm notes.md
+          fi
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            if [ -f notes.md ]; then
+              gh release create "$tag" --title "$tag" --notes-file notes.md
+            else
+              gh release create "$tag" --title "$tag" --generate-notes
+            fi
+          fi
+          gh release upload "$tag" dist/* --clobber
